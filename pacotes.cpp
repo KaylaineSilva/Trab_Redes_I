@@ -1,7 +1,21 @@
-#include "pacotes.h"
+#include <bits/stdc++.h>
+using namespace std;
+
+
+#define TAM_MAX 1472
+#define DATA_MAX 1440
+
+typedef struct pacote_slow PACOTE_SLOW;
+
+
+//Protótipos Funções
+array<uint8_t, 1472> PACOTES_criar_envio(PACOTE_SLOW pac);
+PACOTE_SLOW PACOTES_criar_struct_buffer(array<uint8_t,1472> &pacote_recebido);
+PACOTE_SLOW PACOTE_preencher_struct(array<uint8_t, 16> &sid, uint32_t sttl_flags, uint32_t seqnum, uint32_t acknum, uint16_t window, uint8_t fid, uint8_t fo, vector<uint8_t> &data);
+
 
 struct pacote_slow {
-    array<uint8_t, 16> sid; //Armazena o is da sessão
+    array<uint8_t, 16> sid; //Armazena o id da sessão
     uint32_t sttl_flags; 
     uint32_t seqnum;
     uint32_t acknum;
@@ -12,7 +26,7 @@ struct pacote_slow {
 };
 
 /*
-Entrada: struct para a construção do vetor que representa o pacote a ser enviado
+Entrada: ponteiro para a struct para a construção do vetor que representa o pacote a ser enviado
 Saída: um array que representa um pacote
 Descrição: A partir de uma struct fornecida, a função cria um pacote representado por um array
 */
@@ -42,7 +56,53 @@ array<uint8_t, 1472> PACOTES_criar_envio(PACOTE_SLOW pac){
 
     // Inserir data (do byte 32 em diante, até o tamanho real de pac.data)
     size_t data_size = std::min<size_t>(pac.data.size(), DATA_MAX); //garante que o limite do tamanho dos dados não será ultrapassado
-    std::copy(pac.data.begin(), pac.data.begin() + data_size, buffer.begin() + 32);
+    copy(pac.data.begin(), pac.data.begin() + data_size, buffer.begin() + 32);
+
+    return buffer;
+}
+
+/*
+*/
+PACOTE_SLOW PACOTE_connect() {
+    // Cria um pacote SLOW com as flags de conexão
+    PACOTE_SLOW pac;
+
+    pac.sid = {}; // todos os bytes inicializados com 0
+    pac.sttl_flags = (0 << 5) | 0x10; // sttl = 0, flags = Connect (bit 4) = 0x10
+    pac.seqnum = 0;
+    pac.acknum = 0;
+    pac.window = 1024;
+    pac.fid = 0;
+    pac.fo = 0;
+    
+    return pac;
+}
+
+
+/**/
+array<uint8_t, 32> PACOTE_connect_buffer(PACOTE_SLOW pac_connect) {
+    array<uint8_t, 32> buffer{};
+    
+    // Copiar sid (16 bytes)
+    copy(pac_connect.sid.begin(), pac_connect.sid.end(), buffer.begin());
+
+    // Inserir sttl_flags (4 bytes)
+    memcpy(&buffer[16], &pac_connect.sttl_flags, 4);
+
+    // Inserir seqnum (4 bytes)
+    memcpy(&buffer[20], &pac_connect.seqnum, 4);
+
+    // Inserir acknum (4 bytes)
+    memcpy(&buffer[24], &pac_connect.acknum, 4);
+
+    // Inserir window (2 bytes)
+    memcpy(&buffer[28], &pac_connect.window, 2);
+
+    // Inserir fid (1 byte)
+    buffer[30] = pac_connect.fid;
+
+    // Inserir fo (1 byte)
+    buffer[31] = pac_connect.fo;
 
     return buffer;
 }
@@ -52,7 +112,7 @@ Entrada: array contendo os campos do pacote recebido
 Saída: struct com cada campo do pacote 
 Descrição: A partir de um array representando o pacote recebido, a função preenche uma struct separando cada campo do protocolo SLOW
 */
-PACOTE_SLOW PACOTES_criar_buffer(array<uint8_t,1472> &pacote_recebido){
+PACOTE_SLOW PACOTES_criar_struct_buffer(array<uint8_t,1472> &pacote_recebido){
     PACOTE_SLOW pac;
 
     copy(pacote_recebido.begin(), pacote_recebido.begin()+16, pac.sid.begin()); //Copiar para sid os primeiros 16 bytes do pacote recebido
