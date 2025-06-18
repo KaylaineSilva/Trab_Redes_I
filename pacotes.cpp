@@ -191,7 +191,7 @@ void imprimir(PACOTE_SLOW pac){
         cout << hex << setw(2) << setfill('0') << (int)byte << " ";
     }
     cout << "\nSTTL_FLAGS (binário): " << bitset<32>(pac.sttl_flags)     
-         << "\nFLAG C: " << ((pac.sttl_flags & 0x16) ? "Sim" : "Não") << " "
+         << "\nFLAG C: " << ((pac.sttl_flags & 0x10) ? "Sim" : "Não") << " "
          << "FLAG R: " << ((pac.sttl_flags & 0x08) ? "Sim" : "Não") << " "
          << "FLAG ACK: " << ((pac.sttl_flags & 0x04) ? "Sim" : "Não") << " "
          << "FLAG A/R: " << ((pac.sttl_flags & 0x02) ? "Sim" : "Não") << " "

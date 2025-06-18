@@ -80,8 +80,8 @@ tuple<int, addrinfo *, socklen_t, PACOTE_SLOW> Connect(){
 
     setup = Enviar_ACK_sem_dados(setup, res, sock, addrlen);
 
-    cout << "Pacote recebido do setup do ACK sem dados" << endl;
-    imprimir(setup);
+    /*cout << "Pacote recebido do setup do ACK sem dados" << endl;
+    imprimir(setup);*/
 
     return make_tuple(sock, res, addrlen, setup);
 }
@@ -105,12 +105,12 @@ PACOTE_SLOW Enviar_ACK_sem_dados(PACOTE_SLOW setup, addrinfo *res, int sock, soc
     );
 
 
-    cout << "Pacote de ACK sem dados enviado: " << endl;
-    imprimir(pacote_ack); // Imprime o pacote de ACK sem dados PARA depuração
+    //cout << "Pacote de ACK sem dados enviado: " << endl;
+    //imprimir(pacote_ack); // Imprime o pacote de ACK sem dados PARA depuração
 
     auto buffer = PACOTES_criar_envio(pacote_ack);
 
-    cout << "Tamanho do buffer enviado: " << buffer.size() << endl;
+    //cout << "Tamanho do buffer enviado: " << buffer.size() << endl;
     ssize_t enviados = sendto(sock, buffer.data(), buffer.size(), 0, res->ai_addr, res->ai_addrlen);
     if (enviados < 0) {
         perror("Erro ao enviar ACK sem dados");
@@ -118,7 +118,7 @@ PACOTE_SLOW Enviar_ACK_sem_dados(PACOTE_SLOW setup, addrinfo *res, int sock, soc
 
     cout << "ACK sem dados enviado com sucesso!\n";
     // Aguardar resposta do servidor para o ACK sem dados
-    vector<uint8_t> resposta(1472);
+    /*vector<uint8_t> resposta(1472);
     ssize_t recebidos = recvfrom(sock, resposta.data(), resposta.size(), 0, res->ai_addr, &addrlen);
     if (recebidos < 0) {
         perror("Erro ao receber resposta do ACK sem dados");
@@ -128,7 +128,9 @@ PACOTE_SLOW Enviar_ACK_sem_dados(PACOTE_SLOW setup, addrinfo *res, int sock, soc
 
         PACOTE_SLOW setup_recebido = PACOTES_criar_struct_buffer(resposta);
         return setup_recebido;
-    }
+    }*/
+
+    setup.seqnum += 1; // Incrementa o seqnum para o ACK enviado
 
     return setup; // Retorna o setup original em caso de erro
 }
@@ -148,7 +150,7 @@ vector<PACOTE_SLOW> enviar_dados(PACOTE_SLOW setup, vector<uint8_t> &dados, bool
     uint32_t seqnum_ant = setup.seqnum;
 
     uint32_t sttl = (setup.sttl_flags >> 5);         // Extrai o TTL original
-    uint8_t flags = 0x04;                            // Sempre com ACK ligado
+    uint8_t flags = 0x00;                            // Sempre com ACK ligado
     
     if (revive) flags |= 0x08; // Liga o bit Revive se for necessário reviver a conexão
     
@@ -160,7 +162,7 @@ vector<PACOTE_SLOW> enviar_dados(PACOTE_SLOW setup, vector<uint8_t> &dados, bool
         int cont=0;
 
         while (offset < dados.size()) {
-            flags = 0x04;
+            //flags = 0x04;
 
             //Calcula a flag: se for o último fragmento recebe no campo MB 0, caso contrário recebe 1
             uint8_t mb_flag = (offset + DATA_MAX >= dados.size()) ? 0 : 1;
@@ -173,6 +175,7 @@ vector<PACOTE_SLOW> enviar_dados(PACOTE_SLOW setup, vector<uint8_t> &dados, bool
             PACOTE_SLOW pacote_enviar = PACOTE_preencher_struct(
                 setup.sid,
                 (sttl << 5) | flags, // Mantém os bits de sttl (limpando os bits da flag) e adiciona a flag de envio 
+                //setup.sttl_flags &= 0xFFFFFFE0, //só manda o sttl, todas as flags desligadas
                 seqnum_ant+1, // Incrementa o seqnum para cada pacote enviado
                 seqnum_ant,
                 1024, // Tamanho da janela (window) fixo em 1024
@@ -181,7 +184,7 @@ vector<PACOTE_SLOW> enviar_dados(PACOTE_SLOW setup, vector<uint8_t> &dados, bool
                 dados_fragmentados
             );
 
-            cout << pacote_enviar.sttl_flags << endl;
+            cout << "Enviando o pacote de dados: " << cont << endl;
             pacotes_enviar.push_back(pacote_enviar);
             seqnum_ant += 1;
             offset += tamanho_dados;
@@ -196,6 +199,7 @@ vector<PACOTE_SLOW> enviar_dados(PACOTE_SLOW setup, vector<uint8_t> &dados, bool
         pacote_enviar.push_back(PACOTE_preencher_struct(
             setup.sid, 
             (sttl << 5) | flags, 
+            //setup.sttl_flags &= 0xFFFFFFE0, //só manda o sttl, todas as flags desligadas
             seqnum_ant+1, 
             seqnum_ant, 
             1024, // Tamanho da janela (window) fixo em 1024 
@@ -235,6 +239,8 @@ pair<bool, PACOTE_SLOW> Envio_dados(PACOTE_SLOW setup, addrinfo *res, int sock, 
 
     vector<uint8_t> resposta_dados(1472);
 
+    PACOTE_SLOW novo_setup;
+
     for (const auto& pacote : pacotes_dados_enviar) {
         auto buffer = PACOTES_criar_envio(pacote);
         buffers_enviar.push_back(buffer);
@@ -243,7 +249,8 @@ pair<bool, PACOTE_SLOW> Envio_dados(PACOTE_SLOW setup, addrinfo *res, int sock, 
     int cont = 0;
 
     // Enviar pacotes de dados
-    for (int i=0; i<buffers_enviar.size(); i++) {
+    int i=0;
+    for (i; i<buffers_enviar.size(); i++) {
         ssize_t enviados = sendto(sock, buffers_enviar[i].data(), buffers_enviar[i].size(), 0, res->ai_addr, res->ai_addrlen);
         if (enviados < 0) {
             perror("Erro ao enviar pacote de dados");
@@ -265,17 +272,23 @@ pair<bool, PACOTE_SLOW> Envio_dados(PACOTE_SLOW setup, addrinfo *res, int sock, 
             }
         } else {
             resposta_dados.resize(recebidos); 
+            novo_setup = PACOTES_criar_struct_buffer(resposta_dados);
 
             cont = 0;
             cout << "Resposta recebida para o pacote de dados " << i << " com sucesso!\n";
 
-            if(revive && (resposta_dados[16] & 0x02) == 0) {
-                cerr << "Erro: o servidor não confirmou a revivificação da conexão.\n";
-                return make_pair(false, setup);
-            }
+            cout << "Pacote ack recebido pelo envio de dados: " << endl;
+            imprimir(novo_setup);
 
-            return make_pair(true, PACOTES_criar_struct_buffer(resposta_dados));
+            if(revive && (resposta_dados[16] & 0x02) == 0) {
+                cout << "Erro: o servidor não confirmou a revivificação da conexão.\n";
+            }
         }
+    }
+
+    if(i==buffers_enviar.size()){
+        //Todos os pacotes foram enviados e recebidos com sucesso
+        return make_pair(true, novo_setup);
     }
 
     return make_pair(false, setup);
@@ -299,7 +312,7 @@ pair<bool, PACOTE_SLOW> Disconnect(PACOTE_SLOW setup, addrinfo *res, int sock, s
     PACOTE_SLOW pacote_desconexao;
     
     pacote_desconexao.sid = setup.sid; // Mantém o mesmo SID da conexão
-    pacote_desconexao.sttl_flags = (sttl << 5) | 0x28; // sttl = 0, flags = Ack(1) (bit 2), Connect(1) (bit 4), Revive(1) (bit 3) = 0x28
+    pacote_desconexao.sttl_flags = (sttl << 5) | 0x10 | 0x08 | 0x04; // sttl = 0, flags = Ack(1) (bit 2), Connect(1) (bit 4), Revive(1) (bit 3) = 0x28
     pacote_desconexao.seqnum = setup.seqnum + 1; // Incrementa o seqnum para a desconexão
     pacote_desconexao.acknum = setup.seqnum; // Usa o seqnum atual como acknum
     pacote_desconexao.window = 1024; // Tamanho da janela (window) fixo em 1024
@@ -316,6 +329,9 @@ pair<bool, PACOTE_SLOW> Disconnect(PACOTE_SLOW setup, addrinfo *res, int sock, s
     
     cout << "Pacote de desconexão enviado com sucesso!\n";
 
+    //Incrementa o seqnum para o pacote de desconexão
+    setup.seqnum += 1; 
+
     // Aguardar resposta do servidor para o pacote de desconexão
     vector<uint8_t> resposta(1472);
     ssize_t recebidos = recvfrom(sock, resposta.data(), resposta.size(), 0, res->ai_addr, &addrlen);
@@ -326,8 +342,11 @@ pair<bool, PACOTE_SLOW> Disconnect(PACOTE_SLOW setup, addrinfo *res, int sock, s
         
     } else {
         cout << "Resposta recebida para o pacote de desconexão com sucesso!\n";
-        return make_pair(true, PACOTES_criar_struct_buffer(resposta));
+        //imprimir(PACOTES_criar_struct_buffer(resposta));
+
+        return make_pair(true, setup);
     }
+
 
     return make_pair(false, setup);
 }

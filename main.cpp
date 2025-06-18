@@ -24,22 +24,25 @@ int main() {
     res = get<1>(resultado);
     addrlen = get<2>(resultado);
     setup = get<3>(resultado);
-    
+
+    auto resultDes = Disconnect(setup, res, sock, addrlen);
+
+    resultDes.first ? cout << "Desconexão bem-sucedida!" << endl : cout << "Erro ao desconectar." << endl;
+    setup = resultDes.second;
     
     vector<uint8_t> dados = {'h', 'e', 'l', 'l', 'o', 'w', ' ', 'w', 'o', 'r', 'l', 'd'}; // Dados de exemplo
-    
-    /*auto result = Envio_dados(setup, res, sock, addrlen, dados, true);
+    auto result = Envio_dados(setup, res, sock, addrlen, dados, true);
     
     result.first ? cout << "Dados enviados com sucesso!" << endl : cout << "Erro ao enviar dados." << endl;
     setup = result.second;
     
-    if(deuCerto) cout<< "Dados enviados e recebidos com sucesso!" << endl;
-    else cout << "Erro ao enviar dados." << endl;*/
+    vector<uint8_t> dados_frag(3000);
+    for (size_t i = 0; i < dados_frag.size(); i++) {
+        dados_frag[i] = i % 256;  // Preenche com valores de 0 a 255, repetindo  
+    }
 
-    /*auto result = Disconnect(setup, res, sock, addrlen);
-
-    result.first ? cout << "Desconexão bem-sucedida!" << endl : cout << "Erro ao desconectar." << endl;
-    setup = result.second;*/
+    auto result2 = Envio_dados(setup, res, sock, addrlen, dados_frag, false);
+    result2.first ? cout << "Dados fragmentados enviados com sucesso!" << endl : cout << "Erro ao enviar dados fragmentados." << endl;
 
     // Fechar o socket
     close(sock);
