@@ -1,6 +1,11 @@
-# Trab_Redes_I
-
 # Projeto SLOW Client - Trabalho de Redes I
+
+Trabalho realizado para: Disciplina de Redes de Computadores (2025)
+
+Autoras:
+- Giovanna Lopes de Andrade – NUSP: 14574772
+- Kaylaine Bessa da Silva – NUSP: 14747506
+
 
 Repositório: [https://github.com/KaylaineSilva/Trab_Redes_I.git](https://github.com/KaylaineSilva/Trab_Redes_I.git)
 
@@ -30,41 +35,37 @@ Abra o terminal e execute:
 git clone https://github.com/KaylaineSilva/Trab_Redes_I.git
 cd Trab_Redes_I
 
+```
+
 ## Para compilar
+```bash
 g++ main.cpp -o slow_client
 g++ main.cpp pacotes.cpp -o slow_client
 
+```
+
+## Para executar
+```bash
+
 ./slow_client
+```
 
-O que o programa faz ao rodar
+## Fluxo de execução do programa
+- Conecta com a central (CONNECT)
 
-    Conecta com a central (CONNECT)
+- Desconecta (DISCONNECT) → Deixa a sessão inativa
 
-    Desconecta (DISCONNECT) → Deixa a sessão inativa
+- Revive a sessão (REVIVE) enviando uma mensagem de dados simples
 
-    Revive a sessão (REVIVE) enviando uma mensagem de dados simples
+- Envia dados fragmentados (exemplo com payload > 1440 bytes)
 
-    Envia dados fragmentados (exemplo com payload > 1440 bytes)
-
-    Finaliza a conexão
+- Finaliza a conexão
 
 Todo o fluxo é realizado via socket UDP, respeitando o formato de pacotes e as regras de controle de fluxo definidas no protocolo SLOW.
 
-Pré-requisitos
+## Pré-requisitos
+- Sistema Linux ou WSL (se estiver em Windows)
 
-    Sistema Linux ou WSL (se estiver em Windows)
+- Compilador g++
 
-    Compilador g++
-
-    Acesso à internet
-
-Trabalho realizado para:
-
-Disciplina de Redes de Computadores (2025)
-
-Autores:
-
-    Giovanna Lopes de Andrade – NUSP: 14574772
-
-    Kaylaine Bessa da Silva – NUSP: 14747506
-
+- Acesso à internet
