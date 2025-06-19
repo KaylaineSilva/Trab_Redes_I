@@ -80,8 +80,8 @@ PACOTE_SLOW PACOTE_connect() {
     pac.fid = 0;
     pac.fo = 0;
     
-    cout << "Pacote de conexão enviado: " << endl;
-    imprimir(pac); // Imprime o pacote de conexão PARA depuração
+    /*cout << "Pacote de conexão enviado: " << endl;
+    imprimir(pac); // Imprime o pacote de conexão PARA depuração*/
 
     return pac;
 }

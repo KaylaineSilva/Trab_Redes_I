@@ -27,13 +27,13 @@ int main() {
 
     auto resultDes = Disconnect(setup, res, sock, addrlen);
 
-    resultDes.first ? cout << "Desconexão bem-sucedida!" << endl : cout << "Erro ao desconectar." << endl;
+    resultDes.first ? cout << "Desconexão bem-sucedida!\n" << endl : cout << "Erro ao desconectar.\n" << endl;
     setup = resultDes.second;
     
     vector<uint8_t> dados = {'h', 'e', 'l', 'l', 'o', 'w', ' ', 'w', 'o', 'r', 'l', 'd'}; // Dados de exemplo
     auto result = Envio_dados(setup, res, sock, addrlen, dados, true);
     
-    result.first ? cout << "Dados enviados com sucesso!" << endl : cout << "Erro ao enviar dados." << endl;
+    result.first ? cout << "Dados enviados com sucesso!\n" << endl : cout << "Erro ao enviar dados.\n" << endl;
     setup = result.second;
     
     vector<uint8_t> dados_frag(3000);
@@ -42,7 +42,7 @@ int main() {
     }
 
     auto result2 = Envio_dados(setup, res, sock, addrlen, dados_frag, false);
-    result2.first ? cout << "Dados fragmentados enviados com sucesso!" << endl : cout << "Erro ao enviar dados fragmentados." << endl;
+    result2.first ? cout << "Dados fragmentados enviados com sucesso!\n" << endl : cout << "Erro ao enviar dados fragmentados.\n" << endl;
 
     // Fechar o socket
     close(sock);

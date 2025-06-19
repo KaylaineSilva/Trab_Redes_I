@@ -75,8 +75,8 @@ tuple<int, addrinfo *, socklen_t, PACOTE_SLOW> Connect(){
     }
 
     PACOTE_SLOW setup = PACOTES_criar_struct_buffer(resposta);
-    cout << "Pacote recebido do setup" << endl;
-    imprimir(setup);
+    /*cout << "Pacote recebido do setup" << endl;
+    imprimir(setup);*/
 
     setup = Enviar_ACK_sem_dados(setup, res, sock, addrlen);
 
@@ -116,7 +116,7 @@ PACOTE_SLOW Enviar_ACK_sem_dados(PACOTE_SLOW setup, addrinfo *res, int sock, soc
         perror("Erro ao enviar ACK sem dados");
     }
 
-    cout << "ACK sem dados enviado com sucesso!\n";
+    cout << "ACK sem dados enviado com sucesso!\n" << endl;
     // Aguardar resposta do servidor para o ACK sem dados
     /*vector<uint8_t> resposta(1472);
     ssize_t recebidos = recvfrom(sock, resposta.data(), resposta.size(), 0, res->ai_addr, &addrlen);
@@ -184,7 +184,6 @@ vector<PACOTE_SLOW> enviar_dados(PACOTE_SLOW setup, vector<uint8_t> &dados, bool
                 dados_fragmentados
             );
 
-            cout << "Enviando o pacote de dados: " << cont << endl;
             pacotes_enviar.push_back(pacote_enviar);
             seqnum_ant += 1;
             offset += tamanho_dados;
@@ -209,8 +208,9 @@ vector<PACOTE_SLOW> enviar_dados(PACOTE_SLOW setup, vector<uint8_t> &dados, bool
         ));
 
         //imprimir o pacote_enviar
-        cout << "Pacote de dados a ser enviado: " << endl;
-        imprimir(pacote_enviar[0]);
+        /*cout << "Pacote de dados a ser enviado: " << endl;
+        imprimir(pacote_enviar[0]);*/
+        cout << "Enviando pacote de dados sem fragmentação.\n" << endl;
 
         return pacote_enviar;
     }
@@ -251,6 +251,7 @@ pair<bool, PACOTE_SLOW> Envio_dados(PACOTE_SLOW setup, addrinfo *res, int sock, 
     // Enviar pacotes de dados
     int i=0;
     for (i; i<buffers_enviar.size(); i++) {
+        cout << "Enviando o pacote de dados: " << i << endl;
         ssize_t enviados = sendto(sock, buffers_enviar[i].data(), buffers_enviar[i].size(), 0, res->ai_addr, res->ai_addrlen);
         if (enviados < 0) {
             perror("Erro ao enviar pacote de dados");
@@ -277,8 +278,8 @@ pair<bool, PACOTE_SLOW> Envio_dados(PACOTE_SLOW setup, addrinfo *res, int sock, 
             cont = 0;
             cout << "Resposta recebida para o pacote de dados " << i << " com sucesso!\n";
 
-            cout << "Pacote ack recebido pelo envio de dados: " << endl;
-            imprimir(novo_setup);
+            /*cout << "Pacote ack recebido pelo envio de dados: " << endl;
+            imprimir(novo_setup);*/
 
             if(revive && (resposta_dados[16] & 0x02) == 0) {
                 cout << "Erro: o servidor não confirmou a revivificação da conexão.\n";
