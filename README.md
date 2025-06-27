@@ -30,8 +30,6 @@ Servidor da central: slow.gmelodie.com:7033
 Abra o terminal e execute:
 
 git clone https://github.com/KaylaineSilva/Trab_Redes_I.git
-cd Trab_Redes_I
-
 
 ## Para compilar
 
@@ -45,9 +43,7 @@ g++ main.cpp pacotes.cpp -o slow_client
 ## Fluxo de execução do programa
 - Conecta com a central (CONNECT)
 
-- Desconecta (DISCONNECT) → Deixa a sessão inativa
-
-- Revive a sessão (REVIVE) enviando uma mensagem de dados simples
+- Envia uma mensagem de dados simples
 
 - Envia dados fragmentados (exemplo com payload > 1440 bytes)
 
