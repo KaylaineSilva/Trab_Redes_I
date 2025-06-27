@@ -25,13 +25,8 @@ int main() {
     addrlen = get<2>(resultado);
     setup = get<3>(resultado);
 
-    auto resultDes = Disconnect(setup, res, sock, addrlen);
-
-    resultDes.first ? cout << "Desconexão bem-sucedida!\n" << endl : cout << "Erro ao desconectar.\n" << endl;
-    setup = resultDes.second;
-    
     vector<uint8_t> dados = {'h', 'e', 'l', 'l', 'o', 'w', ' ', 'w', 'o', 'r', 'l', 'd'}; // Dados de exemplo
-    auto result = Envio_dados(setup, res, sock, addrlen, dados, true);
+    auto result = Envio_dados(setup, res, sock, addrlen, dados, false);
     
     result.first ? cout << "Dados enviados com sucesso!\n" << endl : cout << "Erro ao enviar dados.\n" << endl;
     setup = result.second;

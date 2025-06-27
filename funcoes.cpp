@@ -328,10 +328,7 @@ pair<bool, PACOTE_SLOW> Disconnect(PACOTE_SLOW setup, addrinfo *res, int sock, s
         
     }
     
-    cout << "Pacote de desconexão enviado com sucesso!\n";
-
-    //Incrementa o seqnum para o pacote de desconexão
-    setup.seqnum += 1; 
+    cout << "Pacote de desconexão enviado com sucesso!\n"; 
 
     // Aguardar resposta do servidor para o pacote de desconexão
     vector<uint8_t> resposta(1472);
@@ -343,9 +340,10 @@ pair<bool, PACOTE_SLOW> Disconnect(PACOTE_SLOW setup, addrinfo *res, int sock, s
         
     } else {
         cout << "Resposta recebida para o pacote de desconexão com sucesso!\n";
-        //imprimir(PACOTES_criar_struct_buffer(resposta));
+        PACOTE_SLOW novo_setup = PACOTES_criar_struct_buffer(resposta);
+        //imprimir(novo_setup);
 
-        return make_pair(true, setup);
+        return make_pair(true, novo_setup);
     }
 
 

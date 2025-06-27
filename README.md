@@ -18,12 +18,10 @@ Este projeto implementa um **cliente (peripheral)** que segue o protocolo **SLOW
 O cliente realiza todas as etapas fundamentais do protocolo:
 
 - Conexão com o servidor (CONNECT)  
-- Desconexão (colocando a sessão como inativa - DISCONNECT)  
-- Revivificação da conexão (REVIVE + envio de dados)  
+- Envio de dados (sem fragmentação)
 - Envio de dados fragmentados (quando o payload excede o limite de 1440 bytes)
 
 Servidor da central: slow.gmelodie.com:7033
-
 
 ---
 
@@ -31,24 +29,18 @@ Servidor da central: slow.gmelodie.com:7033
 
 Abra o terminal e execute:
 
-```bash
 git clone https://github.com/KaylaineSilva/Trab_Redes_I.git
 cd Trab_Redes_I
 
-```
 
 ## Para compilar
-```bash
+
 g++ main.cpp -o slow_client
 g++ main.cpp pacotes.cpp -o slow_client
 
-```
-
 ## Para executar
-```bash
 
 ./slow_client
-```
 
 ## Fluxo de execução do programa
 - Conecta com a central (CONNECT)
